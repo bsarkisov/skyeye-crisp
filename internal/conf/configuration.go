@@ -19,6 +19,7 @@ const (
 	WhisperAPI   Recognizer = "openai-whisper-api"
 	GPT4o        Recognizer = "openai-gpt4o"
 	GPT4oMini    Recognizer = "openai-gpt4o-mini"
+	OpenAICompatible  Recognizer = "openai-compatible"
 )
 
 // Configuration for the SkyEye application.
@@ -66,6 +67,8 @@ type Configuration struct {
 	WhisperModel *whisper.Model
 	// OpenAIAPIKey is the API key for the OpenAI API. It may be empty if local transcription is configured.
 	OpenAIAPIKey string
+	// OpenAIAPIBaseURL is the base URL for OpenAI-compatible APIs (e.g., "http://localhost:8000/v1"). Only used with openai-compatible recognizer.
+	OpenAIAPIBaseURL string
 	// Voice is the voice used for SRS transmissions
 	Voice voices.Voice
 	// UseSystemVoice controls whether to use the System Voice on macOS. This allows use of current Siri voices,

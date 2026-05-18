@@ -53,6 +53,26 @@ func NewOpenAIRecognizer(apiKey, callsign string) Recognizer { // nolint: revive
 	return NewWhisperAPIRecognizer(apiKey, callsign)
 }
 
+// newOpenAIRecognizerWithBaseURL creates a recognizer that connects to an arbitrary
+// OpenAI-compatible API endpoint via the given baseURL.
+func newOpenAIRecognizerWithBaseURL(apiKey, baseURL, model, callsign string) Recognizer {
+	return &openAIRecognizer{
+		callsign: callsign,
+		client: openai.NewClient(
+			option.WithAPIKey(apiKey),
+			option.WithBaseURL(baseURL),
+		),
+		model: model,
+	}
+}
+
+// NewOpenAICompatibleRecognizer creates a new recognizer using an OpenAI-compatible API endpoint.
+// The baseURL should point to the compatible API (e.g., "http://localhost:8000/v1" for Ollama, vLLM, etc.).
+// The model name depends on the backend (e.g., "whisper-large-v3", "faster-whisper-large-v3-turbo", etc.).
+func NewOpenAICompatibleRecognizer(apiKey, baseURL, model, callsign string) Recognizer {
+	return newOpenAIRecognizerWithBaseURL(apiKey, baseURL, model, callsign)
+}
+
 // Recognize implements [Recognizer.Recognize] using OpenAI Platform's hosted GPT4 transcription model.
 func (r *openAIRecognizer) Recognize(ctx context.Context, sample []float32, _ bool) (string, error) {
 	log.Debug().Msg("creating WAV from sample")

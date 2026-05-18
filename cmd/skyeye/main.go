@@ -59,6 +59,7 @@ var (
 	whisperModelPath             string
 	recognizerLockPath           string
 	openAIAPIKey                 string
+	openAIAPIBaseURL             string
 	voiceName                    string
 	useSystemVoice               bool
 	mute                         bool
@@ -126,11 +127,13 @@ func init() {
 	skyeye.Flags().Var(coalitionFlag, "coalition", "GCI coalition (blue, red)")
 
 	// Speech-to-text
-	recognizerFlag := cli.NewEnum(&recognizerName, "Recognizer", string(conf.WhisperLocal), string(conf.WhisperAPI), string(conf.GPT4o), string(conf.GPT4oMini))
+	recognizerFlag := cli.NewEnum(&recognizerName, "Recognizer", string(conf.WhisperLocal), string(conf.WhisperAPI), string(conf.GPT4o), string(conf.GPT4oMini), string(conf.OpenAICompatible))
 	skyeye.Flags().Var(recognizerFlag, "recognizer", "Speech-to-text recognizer to use")
 	skyeye.Flags().StringVar(&whisperModelPath, "whisper-model", "", "Path to whisper.cpp model")
 	skyeye.Flags().StringVar(&openAIAPIKey, "openai-api-key", "", "API key for OpenAPI AI")
+	skyeye.Flags().StringVar(&openAIAPIBaseURL, "openai-api-base-url", "", "Base URL for OpenAI-compatible API (e.g., http://localhost:8000/v1)")
 	skyeye.MarkFlagsOneRequired("whisper-model", "openai-api-key")
+	// Note: --openai-api-base-url is required when recognizer is openai-compatible (validated at runtime)
 	skyeye.Flags().StringVar(&recognizerLockPath, "recognizer-lock-path", "", "Path to lock file for concurrent speech-to-text when using multiple instances")
 
 	// Text-to-speech
@@ -429,6 +432,7 @@ func run(_ *cobra.Command, _ []string) {
 		RecognizerLock:               recognizerLock,
 		WhisperModel:                 whisperModel,
 		OpenAIAPIKey:                 openAIAPIKey,
+		OpenAIAPIBaseURL:             openAIAPIBaseURL,
 		Voice:                        voice,
 		UseSystemVoice:               useSystemVoice,
 		VoiceLock:                    voiceLock,
