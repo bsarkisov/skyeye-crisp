@@ -2,11 +2,11 @@
 
 **Date:** 2026-05-18
 **Branch:** `crispasr-integration`
-**Status:** ✅ DONE (2026-05-18)
-**Commit:** 849f214
+**Status:** 🔄 IN PROGRESS (2026-05-18)
+**Commit:** 91bd454
 
 ## Goal
-Додати третю опцію розпізнавання — OpenAI-compatible API, яка приймає не тільки API-ключ, але й URL сервера (наприклад, для локальних Ollama, vLLM, LM Studio тощо).
+Додати підтримку OpenAI-compatible API для STT та TTS, що дозволяє використовувати будь-які сумісні сервери (Ollama, vLLM, LM Studio тощо).
 
 ---
 
@@ -32,6 +32,32 @@
 
 - [x] Додати кейс `conf.OpenAICompatible` у switch, який викликає `recognizer.NewOpenAICompatibleRecognizer(config.OpenAIAPIKey, config.OpenAIAPIBaseURL, "whisper", config.Callsign)`
 - [x] Модель для compatible режиму — hardcoded `"whisper"` (для більшості OpenAI-compatible серверів це правильний дефолт)
+
+## Крок 5: Тестування на сервері 🔄
+
+- [ ] Зібрати бінарник на сервері з Go (`make skyeye`)
+- [ ] Запустити інтеграційне тестування з реальним OpenAI-compatible сервером (наприклад, Ollama + whisper модель)
+  - Перевірити `--recognizer openai-compatible --openai-api-base-url "http://localhost:11434/v1"`
+- [ ] Перевірити fallback поведінку при недоступності сервера
+- [ ] Запустити `make test` та `make lint vet fix format`
+
+## Крок 6: OpenAI-compatible TTS Speaker 📋
+
+Додати підтримку OpenAI-compatible API для синтезу мовлення (TTS), аналогічно до STT.
+
+- [ ] Створити `pkg/synthesizer/speakers/openai.go` — новий `openAITTS` struct, що реалізує `Speaker`
+  - Використати `client.Audio.Speech.New()` з OpenAI Go SDK
+  - Підтримка `option.WithBaseURL(baseURL)` для custom endpoint
+  - Параметри: `apiKey`, `baseURL`, `model` (напр. `"tts-1"`, `"tts-1-hd"`), `voice` (напр. `"alloy"`, `"echo"`, `"fable"`, `"onyx"`, `"nova"`, `"shimmer"`)
+  - Повертає `[]float32` PCM audio (конвертувати з MP3/PCM відповіді API)
+- [ ] Додати константу `OpenAITTS Speaker = "openai-tts"` до конфігурації (або використати існуючий enum voice)
+- [ ] Додати CLI флаги:
+  - `--tts-engine openai-compatible` — вибір TTS движка
+  - `--openai-tts-model` — модель для TTS (default: `"tts-1"`)
+  - `--openai-tts-voice` — голос для TTS (default: `"alloy"`)
+  - `--openai-api-base-url` вже існує, можна використовувати той самий для TTS
+- [ ] Додати кейс у switch `internal/application/app.go` для створення TTS speaker
+- [ ] Обго��орити: чи потрібен окремий `--openai-tts-base-url`, чи достатньо спільного `--openai-api-base-url`?
 
 ---
 
