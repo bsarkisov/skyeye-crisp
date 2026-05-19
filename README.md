@@ -111,6 +111,47 @@ Within the domain of air combat communication, these problems are less linguisti
 
 While working on this software I spoke to a number of people who thought it would be as easy as feeding a bunch of PDFs to an LLM and it would magically learn how to be a competent tactical controller. This could not be further from the truth!
 
+### Can I use self-hosted AI models instead of OpenAI's API?
+
+Yes. SkyEye supports **OpenAI-compatible APIs** for both speech recognition (STT) and text-to-speech (TTS). This means you can run SkyEye entirely on your own hardware using local servers like [Ollama](https://ollama.com/), [vLLM](https://docs.vllm.ai/), or [LM Studio](https://lmstudio.ai/) — no cloud API required.
+
+**Speech Recognition (STT):** Use `--recognizer openai-compatible` with `--openai-api-base-url` pointing to your local server:
+
+```bash
+# Ollama with whisper model
+skyeye --recognizer openai-compatible \
+  --openai-api-key "anything" \
+  --openai-api-base-url "http://localhost:11434/v1"
+
+# vLLM or LM Studio
+skyeye --recognizer openai-compatible \
+  --openai-api-key "your-key" \
+  --openai-api-base-url "http://localhost:8000/v1"
+```
+
+**Text-to-Speech (TTS):** Use `--tts-engine openai-compatible` to route TTS through the same or a different OpenAI-compatible endpoint:
+
+```bash
+# Using local server for both STT and TTS
+skyeye --recognizer openai-compatible \
+  --tts-engine openai-compatible \
+  --openai-api-key "your-key" \
+  --openai-api-base-url "http://localhost:8000/v1" \
+  --openai-tts-model tts-1 \
+  --openai-tts-voice alloy
+
+# Mix and match: local STT + OpenAI Platform TTS
+skyeye --recognizer openai-compatible \
+  --tts-engine openai-compatible \
+  --openai-api-key "sk-..." \
+  --openai-tts-model tts-1-hd \
+  --openai-tts-voice nova
+```
+
+Available voices depend on your backend. OpenAI Platform supports: `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`. Local servers may support different models and voices — check your server's documentation.
+
+You can also **mix and match** engines independently — for example, use a local whisper model for STT (`--recognizer openai-whisper-local`) while using an OpenAI-compatible TTS engine, or vice versa. The `--openai-api-base-url` flag is shared between both STT and TTS when using the compatible mode.
+
 ### Could this provide ATC services?
 
 I have no plans to attempt an ATC bot due to limitations within DCS.
