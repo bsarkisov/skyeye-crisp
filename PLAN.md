@@ -41,38 +41,49 @@
 - [ ] Перевірити fallback поведінку при недоступності сервера
 - [ ] Запустити `make test` та `make lint vet fix format`
 
-## Крок 6: OpenAI-compatible TTS Speaker 📋
+## Крок 6: OpenAI-compatible TTS Speaker ✅
 
 Додати підтримку OpenAI-compatible API для синтезу мовлення (TTS), аналогічно до STT.
 
-- [ ] Створити `pkg/synthesizer/speakers/openai.go` — новий `openAITTS` struct, що реалізує `Speaker`
-  - Використати OpenAI Go SDK для `/v1/audio/speech` endpoint з `option.WithBaseURL(baseURL)`
+- [x] Створити `pkg/synthesizer/speakers/openai.go` — новий `openAITTSSpeaker` struct, що реалізує `Speaker`
+  - Використано raw HTTP запити до `/v1/audio/speech` (openai-go alpha.41 має нестабільне API Speech)
   - `response_format: "pcm"` — повертає raw 16-bit LE PCM (24kHz), без MP3 декодера
-  - Конвертувати PCM → `[]float32` через існуючий `pcm.S16LEBytesToF32LE()` + downsample до 16kHz (як Piper)
-  - Параметри: `apiKey`, `baseURL`, `model` (напр. `"tts-1"`, `"tts-1-hd"`), `voice` (напр. `"alloy"`, `"echo"`, `"fable"`, `"onyx"`, `"nova"`, `"shimmer"`)
-- [ ] Додати поле `TTSEngine string` до `Configuration` — вибір TTS движка (`"piper"`, `"macos"`, `"openai-compatible"`)
-  - Для macOS залишити автодетекцію через `runtime.GOOS` як fallback, якщо явно не вказано engine
-- [ ] Додати CLI флаги:
+  - Конвертувати PCM → downsample до 16kHz → `[]float32` через `downsample()` + `pcm.S16LEBytesToF32LE()`
+- [x] Додати тип `TTSEngine string` та константи (`"piper"`, `"macos"`, `"openai-compatible"`) до `internal/conf/configuration.go`
+  - Поля `OpenAITTSModel` та `OpenAITTSVoice` до `Configuration`
+  - Для macOS/Linux залишено автодетекцію через `runtime.GOOS` як fallback, якщо явно не вказано engine
+- [x] Додати CLI флаги:
   - `--tts-engine openai-compatible` — вибір TTS движка (default: платформозалежний — piper/macos)
   - `--openai-tts-model` — модель для TTS (default: `"tts-1"`)
   - `--openai-tts-voice` — голос для TTS (default: `"alloy"`)
   - `--openai-api-base-url` вже існує, використовується спільно для STT та TTS
-- [ ] Додати кейс у switch `internal/application/app.go` для створення TTS speaker на основі `config.TTSEngine`
+- [x] Додати кейс у switch `internal/application/app.go` для створення TTS speaker на основі `config.TTSEngine`
 
 ---
 
 ## Usage Example
 
 ```bash
-# Using local Ollama with whisper model
+# Using local Ollama with whisper model (STT only)
 skyeye --recognizer openai-compatible \
   --openai-api-key "anything" \
   --openai-api-base-url "http://localhost:11434/v1"
 
-# Using vLLM or LM Studio
+# Using vLLM or LM Studio for both STT and TTS
 skyeye --recognizer openai-compatible \
+  --tts-engine openai-compatible \
   --openai-api-key "your-key" \
-  --openai-api-base-url "http://localhost:8000/v1"
+  --openai-api-base-url "http://localhost:8000/v1" \
+  --openai-tts-model tts-1 \
+  --openai-tts-voice alloy
+
+# Using OpenAI Platform for TTS with local Piper (default)
+skyeye --recognizer openai-whisper-local \
+  --whisper-model ggml-small.en.bin \
+  --tts-engine openai-compatible \
+  --openai-api-key "sk-..." \
+  --openai-tts-model tts-1-hd \
+  --openai-tts-voice nova
 ```
 
 ## Notes

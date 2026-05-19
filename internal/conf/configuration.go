@@ -22,6 +22,14 @@ const (
 	OpenAICompatible  Recognizer = "openai-compatible"
 )
 
+type TTSEngine string
+
+const (
+	TTSPiper            TTSEngine = "piper"
+	TTSMacOS            TTSEngine = "macos"
+	TTSOpenAICompatible TTSEngine = "openai-compatible"
+)
+
 // Configuration for the SkyEye application.
 type Configuration struct {
 	// ACMIFile is the path to the ACMI file
@@ -71,6 +79,12 @@ type Configuration struct {
 	OpenAIAPIBaseURL string
 	// Voice is the voice used for SRS transmissions
 	Voice voices.Voice
+	// TTSEngine selects which text-to-speech engine to use. Empty string means auto-detect by platform (macOS → macos, others → piper).
+	TTSEngine TTSEngine
+	// OpenAITTSModel is the model name for OpenAI-compatible TTS (e.g., "tts-1", "tts-1-hd"). Only used with openai-compatible TTS engine.
+	OpenAITTSModel string
+	// OpenAITTSVoice is the voice name for OpenAI-compatible TTS (e.g., "alloy", "echo", "fable", "onyx", "nova", "shimmer"). Only used with openai-compatible TTS engine.
+	OpenAITTSVoice string
 	// UseSystemVoice controls whether to use the System Voice on macOS. This allows use of current Siri voices,
 	// but requires additional configuration in System Settings.
 	UseSystemVoice bool

@@ -61,6 +61,9 @@ var (
 	openAIAPIKey                 string
 	openAIAPIBaseURL             string
 	voiceName                    string
+	ttsEngine                    string
+	openAITTSModel               string
+	openAITTSVoice               string
 	useSystemVoice               bool
 	mute                         bool
 	voiceSpeed                   float64
@@ -137,6 +140,10 @@ func init() {
 	skyeye.Flags().StringVar(&recognizerLockPath, "recognizer-lock-path", "", "Path to lock file for concurrent speech-to-text when using multiple instances")
 
 	// Text-to-speech
+	ttsEngineFlag := cli.NewEnum(&ttsEngine, "TTSEngine", "", string(conf.TTSPiper), string(conf.TTSMacOS), string(conf.TTSOpenAICompatible))
+	skyeye.Flags().Var(ttsEngineFlag, "tts-engine", "Text-to-speech engine to use (piper, macos, openai-compatible). Auto-detected by platform if not provided.")
+	skyeye.Flags().StringVar(&openAITTSModel, "openai-tts-model", "tts-1", "Model for OpenAI-compatible TTS (e.g., tts-1, tts-1-hd)")
+	skyeye.Flags().StringVar(&openAITTSVoice, "openai-tts-voice", "alloy", "Voice for OpenAI-compatible TTS (e.g., alloy, echo, fable, onyx, nova, shimmer)")
 	voiceFlag := cli.NewEnum(&voiceName, "Voice", "", "feminine", "masculine")
 	skyeye.Flags().Var(voiceFlag, "voice", "Voice to use for SRS transmissions (feminine, masculine). Automatically chosen if not provided.")
 	skyeye.Flags().Float64Var(&voiceSpeed, "voice-playback-speed", 1.0, "How quickly the GCI speaks (values below 1.0 are faster and above are slower).")
@@ -434,6 +441,9 @@ func run(_ *cobra.Command, _ []string) {
 		OpenAIAPIKey:                 openAIAPIKey,
 		OpenAIAPIBaseURL:             openAIAPIBaseURL,
 		Voice:                        voice,
+		TTSEngine:                    conf.TTSEngine(ttsEngine),
+		OpenAITTSModel:               openAITTSModel,
+		OpenAITTSVoice:               openAITTSVoice,
 		UseSystemVoice:               useSystemVoice,
 		VoiceLock:                    voiceLock,
 		Mute:                         mute,

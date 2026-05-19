@@ -207,12 +207,34 @@ func NewApplication(config conf.Configuration) (*Application, error) {
 
 	log.Info().Msg("constructing text-to-speech synthesizer")
 	var synthesizer speakers.Speaker
-	if runtime.GOOS == "darwin" {
+	switch config.TTSEngine {
+	case conf.TTSOpenAICompatible:
+		if config.OpenAIAPIBaseURL == "" {
+			return nil, fmt.Errorf("failed to construct application: --openai-api-base-url is required when using openai-compatible TTS engine")
+		}
+		synthesizer = speakers.NewOpenAICompatibleTTSSpeaker(
+			config.OpenAIAPIKey,
+			config.OpenAIAPIBaseURL,
+			config.OpenAITTSModel,
+			config.OpenAITTSVoice,
+			config.VoiceSpeed,
+		)
+	case conf.TTSMacOS:
 		synthesizer = speakers.NewMacOSSpeaker(config.UseSystemVoice, config.VoiceSpeed)
-	} else {
+	case conf.TTSPiper:
 		synthesizer, err = speakers.NewPiperSpeaker(config.Voice, config.VoiceSpeed, config.VoicePauseLength)
 		if err != nil {
 			return nil, fmt.Errorf("failed to construct application: %w", err)
+		}
+	default:
+		// Auto-detect by platform when TTSEngine is not explicitly set
+		if runtime.GOOS == "darwin" {
+			synthesizer = speakers.NewMacOSSpeaker(config.UseSystemVoice, config.VoiceSpeed)
+		} else {
+			synthesizer, err = speakers.NewPiperSpeaker(config.Voice, config.VoiceSpeed, config.VoicePauseLength)
+			if err != nil {
+				return nil, fmt.Errorf("failed to construct application: %w", err)
+			}
 		}
 	}
 
