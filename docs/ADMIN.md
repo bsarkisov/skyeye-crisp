@@ -214,6 +214,28 @@ recognizer: openai-whisper-local
 whisper-model: whisper.bin
 ```
 
+### OpenAI-Compatible Speech Recognition (Self-Hosted)
+
+SkyEye supports connecting to any server that implements the OpenAI API specification, such as [Ollama](https://ollama.com/), [vLLM](https://docs.vllm.ai/), or [LM Studio](https://lmstudio.ai/). This allows you to run speech recognition entirely on your own hardware without relying on cloud APIs.
+
+To use an OpenAI-compatible server, set `recognizer` to `openai-compatible` and provide the base URL via `openai-api-base-url`:
+
+```yaml
+# Ollama with whisper model
+recognizer: openai-compatible
+openai-api-key: anything          # Ollama ignores this; any non-empty value works
+openai-api-base-url: http://localhost:11434/v1
+
+# vLLM or LM Studio
+recognizer: openai-compatible
+openai-api-key: your-key
+openai-api-base-url: http://localhost:8000/v1
+```
+
+The `--openai-api-base-url` flag is shared between STT and TTS when using the compatible mode. You can also **mix and match** — for example, use a local whisper model for STT (`recognizer: openai-whisper-local`) while using an OpenAI-compatible TTS engine (see below).
+
+Available models depend on your server. Ollama supports `whisper`, `whisper-large`, and other Whisper variants. Check your server's documentation for supported models.
+
 ## Speech Synthesis
 
 ### Windows and Linux
@@ -276,6 +298,35 @@ say "Hello! This should be read in the voice you chose."
 ```
 
 Finally, to use the selected voice instead of Samantha, set SkyEye's `use-system-voice` configuration option to `true`.
+
+### OpenAI-Compatible Text-to-Speech (Self-Hosted)
+
+SkyEye also supports using an OpenAI-compatible API for text-to-speech. This allows you to generate speech using a self-hosted server (e.g., vLLM, LM Studio) or the OpenAI Platform, instead of the bundled Piper voices or macOS system voice.
+
+By default, SkyEye auto-detects the TTS engine based on your platform:
+- **macOS** → system voice (Siri / Samantha)
+- **Windows and Linux** → Piper (embedded neural voices: Jenny or Alan)
+
+To override this, set `tts-engine` to `openai-compatible`:
+
+```yaml
+# Using the OpenAI Platform for TTS
+tts-engine: openai-compatible
+openai-api-key: sk-your-openai-key-here
+openai-tts-model: tts-1-hd
+openai-tts-voice: nova
+
+# Using a self-hosted server (e.g., vLLM, LM Studio)
+tts-engine: openai-compatible
+openai-api-key: your-key
+openai-api-base-url: http://localhost:8000/v1
+openai-tts-model: tts-1
+openai-tts-voice: alloy
+```
+
+Available voices depend on the backend. The OpenAI Platform supports: `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`. Self-hosted servers may support different models and voices — check your server's documentation.
+
+You can **mix and match** engines independently — for example, use a local whisper model for STT (`recognizer: openai-whisper-local`) while using an OpenAI-compatible TTS engine, or vice versa. The `openai-api-base-url` is shared between both STT and TTS when using the compatible mode; if you need different endpoints for each, set it once (it applies to whichever component uses it).
 
 ## Networking
 

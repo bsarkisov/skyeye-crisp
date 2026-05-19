@@ -54,6 +54,19 @@
 # If you chose the OpenAI API for cloud-based speech recognition, you need to
 # provide an API key. You can get an API key at https://openai.com/api.
 #openai-api-key: apikeygoeshere
+#
+# Alternatively, use "openai-compatible" to connect to a self-hosted server that
+# implements the OpenAI API (e.g., Ollama, vLLM, LM Studio). This allows you to
+# run speech recognition entirely on your own hardware without cloud APIs.
+#recognizer: openai-compatible
+#
+# The base URL of your OpenAI-compatible server. Required when using the
+# "openai-compatible" recognizer or TTS engine.
+# Examples:
+#   Ollama:       http://localhost:11434/v1
+#   vLLM:         http://localhost:8000/v1
+#   LM Studio:    http://localhost:1234/v1
+#openai-api-base-url: http://localhost:11434/v1
 
 # TELEMETRY
 # Telemetry service address. Set this to the host and port of the TacView
@@ -128,6 +141,25 @@
 #coalition: blue
 
 # SPEECH SYNTHESIS
+#
+# By default, SkyEye auto-detects the TTS engine based on your platform:
+#   macOS  → system voice (Siri)
+#   Others → Piper (embedded neural voices: Jenny or Alan)
+#
+# To override this and use an OpenAI-compatible API for text-to-speech,
+# set tts-engine to "openai-compatible". This allows you to generate speech
+# using a self-hosted server (e.g., vLLM, LM Studio) or the OpenAI Platform.
+#tts-engine: openai-compatible
+#
+# The model name for TTS when using an OpenAI-compatible engine.
+# Examples: "tts-1", "tts-1-hd" (OpenAI Platform), or any model supported by your server.
+#openai-tts-model: tts-1
+#
+# The voice name for TTS when using an OpenAI-compatible engine.
+# Available voices depend on the backend. OpenAI Platform supports:
+#   alloy, echo, fable, onyx, nova, shimmer
+#openai-tts-voice: alloy
+#
 # Select a voice (either feminine or masculine). If you don't select one, one
 # is selected for you. This option is not available on macOS.
 #voice: feminine
