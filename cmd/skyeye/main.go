@@ -60,6 +60,7 @@ var (
 	recognizerLockPath           string
 	openAIAPIKey                 string
 	openAIAPIBaseURL             string
+	openAICompatibleSTTModel     string
 	voiceName                    string
 	ttsEngine                    string
 	openAITTSModel               string
@@ -135,6 +136,7 @@ func init() {
 	skyeye.Flags().StringVar(&whisperModelPath, "whisper-model", "", "Path to whisper.cpp model")
 	skyeye.Flags().StringVar(&openAIAPIKey, "openai-api-key", "", "API key for OpenAPI AI")
 	skyeye.Flags().StringVar(&openAIAPIBaseURL, "openai-api-base-url", "", "Base URL for OpenAI-compatible API (e.g., http://localhost:8000/v1)")
+	skyeye.Flags().StringVar(&openAICompatibleSTTModel, "openai-compatible-stt-model", "whisper", "Model name for OpenAI-compatible STT (e.g., whisper-large-v3, faster-whisper-large-v3-turbo)")
 	skyeye.MarkFlagsOneRequired("whisper-model", "openai-api-key")
 	// Note: --openai-api-base-url is required when recognizer is openai-compatible (validated at runtime)
 	skyeye.Flags().StringVar(&recognizerLockPath, "recognizer-lock-path", "", "Path to lock file for concurrent speech-to-text when using multiple instances")
@@ -440,6 +442,7 @@ func run(_ *cobra.Command, _ []string) {
 		WhisperModel:                 whisperModel,
 		OpenAIAPIKey:                 openAIAPIKey,
 		OpenAIAPIBaseURL:             openAIAPIBaseURL,
+		OpenAICompatibleSTTModel:     openAICompatibleSTTModel,
 		Voice:                        voice,
 		TTSEngine:                    conf.TTSEngine(ttsEngine),
 		OpenAITTSModel:               openAITTSModel,

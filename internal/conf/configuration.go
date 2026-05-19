@@ -77,6 +77,9 @@ type Configuration struct {
 	OpenAIAPIKey string
 	// OpenAIAPIBaseURL is the base URL for OpenAI-compatible APIs (e.g., "http://localhost:8000/v1"). Only used with openai-compatible recognizer.
 	OpenAIAPIBaseURL string
+	// OpenAICompatibleSTTModel is the model name for OpenAI-compatible STT (e.g., "whisper-large-v3", "faster-whisper-large-v3-turbo").
+	// Defaults to "whisper" if not set. Only used with openai-compatible recognizer.
+	OpenAICompatibleSTTModel string
 	// Voice is the voice used for SRS transmissions
 	Voice voices.Voice
 	// TTSEngine selects which text-to-speech engine to use. Empty string means auto-detect by platform (macOS → macos, others → piper).

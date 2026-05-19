@@ -221,18 +221,20 @@ SkyEye supports connecting to any server that implements the OpenAI API specific
 To use an OpenAI-compatible server, set `recognizer` to `openai-compatible` and provide the base URL via `openai-api-base-url`:
 
 ```yaml
-# Ollama with whisper model
+# Ollama with whisper-large-v3 model
 recognizer: openai-compatible
-openai-api-key: anything          # Ollama ignores this; any non-empty value works
+openai-api-key: anything                  # Ollama ignores this; any non-empty value works
 openai-api-base-url: http://localhost:11434/v1
+openai-compatible-stt-model: whisper-large-v3
 
-# vLLM or LM Studio
+# vLLM or LM Studio with a custom model
 recognizer: openai-compatible
 openai-api-key: your-key
 openai-api-base-url: http://localhost:8000/v1
+openai-compatible-stt-model: faster-whisper-large-v3-turbo
 ```
 
-The `--openai-api-base-url` flag is shared between STT and TTS when using the compatible mode. You can also **mix and match** — for example, use a local whisper model for STT (`recognizer: openai-whisper-local`) while using an OpenAI-compatible TTS engine (see below).
+The `openai-compatible-stt-model` option specifies which model your server should use for transcription. The default value is `whisper`, but most self-hosted servers require the full model name (e.g., `whisper-large-v3`, `faster-whisper-large-v3-turbo`). If you see a `model_not_found` error, check that the model name matches what your server expects.
 
 Available models depend on your server. Ollama supports `whisper`, `whisper-large`, and other Whisper variants. Check your server's documentation for supported models.
 
