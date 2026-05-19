@@ -2,8 +2,8 @@
 
 **Date:** 2026-05-18
 **Branch:** `crispasr-integration`
-**Status:** 🔄 IN PROGRESS (2026-05-18)
-**Commit:** 91bd454
+**Status:** 🔄 IN PROGRESS (2026-05-19)
+**Commit:** 1f3f07f
 
 ## Goal
 Додати підтримку OpenAI-compatible API для STT та TTS, що дозволяє використовувати будь-які сумісні сервери (Ollama, vLLM, LM Studio тощо).
@@ -46,18 +46,18 @@
 Додати підтримку OpenAI-compatible API для синтезу мовлення (TTS), аналогічно до STT.
 
 - [ ] Створити `pkg/synthesizer/speakers/openai.go` — новий `openAITTS` struct, що реалізує `Speaker`
-  - Використати `client.Audio.Speech.New()` з OpenAI Go SDK
-  - Підтримка `option.WithBaseURL(baseURL)` для custom endpoint
+  - Використати OpenAI Go SDK для `/v1/audio/speech` endpoint з `option.WithBaseURL(baseURL)`
+  - `response_format: "pcm"` — повертає raw 16-bit LE PCM (24kHz), без MP3 декодера
+  - Конвертувати PCM → `[]float32` через існуючий `pcm.S16LEBytesToF32LE()` + downsample до 16kHz (як Piper)
   - Параметри: `apiKey`, `baseURL`, `model` (напр. `"tts-1"`, `"tts-1-hd"`), `voice` (напр. `"alloy"`, `"echo"`, `"fable"`, `"onyx"`, `"nova"`, `"shimmer"`)
-  - Повертає `[]float32` PCM audio (конвертувати з MP3/PCM відповіді API)
-- [ ] Додати константу `OpenAITTS Speaker = "openai-tts"` до конфігурації (або використати існуючий enum voice)
+- [ ] Додати поле `TTSEngine string` до `Configuration` — вибір TTS движка (`"piper"`, `"macos"`, `"openai-compatible"`)
+  - Для macOS залишити автодетекцію через `runtime.GOOS` як fallback, якщо явно не вказано engine
 - [ ] Додати CLI флаги:
-  - `--tts-engine openai-compatible` — вибір TTS движка
+  - `--tts-engine openai-compatible` — вибір TTS движка (default: платформозалежний — piper/macos)
   - `--openai-tts-model` — модель для TTS (default: `"tts-1"`)
   - `--openai-tts-voice` — голос для TTS (default: `"alloy"`)
-  - `--openai-api-base-url` вже існує, можна використовувати той самий для TTS
-- [ ] Додати кейс у switch `internal/application/app.go` для створення TTS speaker
-- [ ] Обго��орити: чи потрібен окремий `--openai-tts-base-url`, чи достатньо спільного `--openai-api-base-url`?
+  - `--openai-api-base-url` вже існує, використовується спільно для STT та TTS
+- [ ] Додати кейс у switch `internal/application/app.go` для створення TTS speaker на основі `config.TTSEngine`
 
 ---
 
