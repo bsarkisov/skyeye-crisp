@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/dharmab/skyeye/pkg/pcm"
 	openai "github.com/openai/openai-go"
@@ -56,6 +57,11 @@ func NewOpenAIRecognizer(apiKey, callsign string) Recognizer { // nolint: revive
 // newOpenAIRecognizerWithBaseURL creates a recognizer that connects to an arbitrary
 // OpenAI-compatible API endpoint via the given baseURL.
 func newOpenAIRecognizerWithBaseURL(apiKey, baseURL, model, callsign string) Recognizer {
+	// Ensure trailing slash so the SDK appends endpoint paths correctly
+	// (e.g., "http://host:8000/v1" + "audio/transcriptions" → "http://host:8000/audio/transcriptions" without it)
+	if !strings.HasSuffix(baseURL, "/") {
+		baseURL = baseURL + "/"
+	}
 	return &openAIRecognizer{
 		callsign: callsign,
 		client: openai.NewClient(
